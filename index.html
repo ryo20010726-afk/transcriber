@@ -46,21 +46,6 @@
     text-transform: uppercase; letter-spacing: 0.08em;
     margin-bottom: 12px;
   }
-  .model-btns { display: flex; gap: 8px; flex-wrap: wrap; }
-  .model-btn {
-    flex: 1; min-width: 120px;
-    background: var(--surface2);
-    border: 2px solid var(--border);
-    border-radius: 8px;
-    color: var(--text);
-    padding: 10px 12px;
-    cursor: pointer;
-    text-align: left;
-    transition: border-color 0.2s;
-  }
-  .model-btn.selected { border-color: var(--accent); }
-  .model-btn .model-name { font-size: 14px; font-weight: 600; }
-  .model-btn .model-desc { font-size: 11px; color: var(--text2); margin-top: 3px; }
   .file-drop-zone {
     border: 2px dashed var(--border);
     border-radius: var(--radius);
@@ -91,9 +76,8 @@
   .file-delete {
     background: none; border: none; color: var(--text2);
     font-size: 16px; cursor: pointer; padding: 2px 6px;
-    border-radius: 4px; transition: color 0.2s;
+    border-radius: 4px;
   }
-  .file-delete:hover { color: var(--danger); }
   .file-controls { display: flex; gap: 8px; margin-top: 10px; }
   .btn-sm {
     background: var(--surface2); border: 1px solid var(--border);
@@ -106,7 +90,6 @@
     border: none; border-radius: var(--radius);
     color: #fff; font-size: 16px; font-weight: 600;
     padding: 16px; cursor: pointer; margin-top: 8px;
-    transition: opacity 0.2s;
   }
   .btn-run:disabled { opacity: 0.4; cursor: not-allowed; }
   .progress-wrap { display: none; margin-top: 12px; }
@@ -138,18 +121,17 @@
     border-radius: 8px; padding: 14px;
     max-height: 400px; overflow-y: auto;
   }
-  .model-status {
-    font-size: 12px; margin-top: 10px; padding: 8px 12px;
-    border-radius: 8px; display: none;
+  .status-box {
+    font-size: 12px; margin-top: 10px; padding: 10px 12px;
+    border-radius: 8px;
   }
-  .model-status.show { display: block; }
-  .model-status.loading { background: rgba(108,143,255,0.1); color: var(--accent); border: 1px solid rgba(108,143,255,0.25); }
-  .model-status.ready { background: rgba(52,211,153,0.1); color: var(--success); border: 1px solid rgba(52,211,153,0.25); }
-  .model-status.error { background: rgba(248,113,113,0.1); color: var(--danger); border: 1px solid rgba(248,113,113,0.25); }
+  .status-box.loading { background: rgba(108,143,255,0.1); color: var(--accent); border: 1px solid rgba(108,143,255,0.25); }
+  .status-box.ready { background: rgba(52,211,153,0.1); color: var(--success); border: 1px solid rgba(52,211,153,0.25); }
+  .status-box.error { background: rgba(248,113,113,0.1); color: var(--danger); border: 1px solid rgba(248,113,113,0.25); }
   .log-wrap {
     background: var(--surface2); border: 1px solid var(--border);
     border-radius: 8px; padding: 10px 12px;
-    margin-top: 10px; max-height: 160px; overflow-y: auto;
+    margin-top: 10px; max-height: 120px; overflow-y: auto;
   }
   .log-line { font-size: 11px; color: var(--text2); font-family: monospace; margin-bottom: 3px; }
   .log-line.ok { color: var(--success); }
@@ -160,22 +142,9 @@
 <body>
 <header>
   <h1>🎙 ローカル文字起こし</h1>
-  <p>完全オフライン処理 — 音声データは外部に送信されません</p>
+  <p>Whisper Tiny — スマホ最適化版</p>
 </header>
-<div class="card">
-  <div class="card-title">🤖 モデル選択</div>
-  <div class="model-btns">
-    <button class="model-btn selected" data-model="Xenova/whisper-small" onclick="selectModel(this)">
-      <div class="model-name">Whisper Small</div>
-      <div class="model-desc">約150MB・速い・日本語OK</div>
-    </button>
-    <button class="model-btn" data-model="Xenova/whisper-medium" onclick="selectModel(this)">
-      <div class="model-name">Whisper Medium</div>
-      <div class="model-desc">約450MB・高精度・遅め</div>
-    </button>
-  </div>
-  <div class="model-status" id="modelStatus"></div>
-</div>
+
 <div class="card">
   <div class="card-title">🎵 音声ファイル</div>
   <div class="file-drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
@@ -183,18 +152,24 @@
     <p>タップして音声ファイルを選択</p>
     <p style="font-size:11px;margin-top:4px;">AAC / M4A / MP3 / WAV 対応</p>
   </div>
-  <input type="file" id="fileInput" multiple accept=".aac,.m4a,.mp3,.wav,.mp4,.ogg,.flac" onchange="addFiles(this.files)">
+  <input type="file" id="fileInput" accept=".aac,.m4a,.mp3,.wav,.mp4,.ogg,.flac" onchange="onFileSelected(this.files)">
   <ul id="fileList"></ul>
   <div class="file-controls" id="fileControls" style="display:none;">
-    <button class="btn-sm" onclick="document.getElementById('fileInput').click()">＋ 追加</button>
-    <button class="btn-sm" onclick="clearAllFiles()">✕ 全削除</button>
+    <button class="btn-sm" onclick="clearFile()">✕ 削除</button>
   </div>
 </div>
-<button class="btn-run" id="btnRun" disabled onclick="startTranscribe()">🚀 文字起こし開始</button>
+
+<div class="status-box loading" id="statusBox">⏳ 準備中… モデルをロードしています（約40MB）</div>
+
+<button class="btn-run" id="btnRun" disabled onclick="startTranscribe()">
+  🚀 文字起こし開始
+</button>
+
 <div class="progress-wrap" id="progressWrap">
   <div class="progress-bar-bg"><div class="progress-bar-fill" id="progressFill"></div></div>
   <div class="progress-label" id="progressLabel">準備中…</div>
 </div>
+
 <div class="result-card" id="resultCard">
   <div class="result-header">
     <div class="result-title">✅ 文字起こし完了</div>
@@ -202,56 +177,173 @@
   </div>
   <div class="result-text" id="resultText"></div>
 </div>
+
 <div class="log-wrap" id="logWrap">
-  <div class="log-line">待機中… ファイルを選択してください</div>
+  <div class="log-line">起動中…</div>
 </div>
+
 <script type="module">
 import { pipeline, env } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2/dist/transformers.min.js';
+
 env.allowLocalModels = false;
 env.useBrowserCache = true;
-let files = [], selectedModel = 'Xenova/whisper-small', transcriber = null, transcriptText = '', isLoading = false;
+
+let selectedFile = null;
+let transcriber = null;
+let transcriptText = '';
+let modelReady = false;
+
 function log(msg, type='') {
   const wrap = document.getElementById('logWrap');
   const ts = new Date().toLocaleTimeString('ja-JP');
-  const line = document.createElement('div');
-  line.className = 'log-line' + (type ? ' ' + type : '');
-  line.textContent = `[${ts}] ${msg}`;
-  wrap.appendChild(line);
+  const d = document.createElement('div');
+  d.className = 'log-line' + (type ? ' '+type : '');
+  d.textContent = `[${ts}] ${msg}`;
+  wrap.appendChild(d);
   wrap.scrollTop = wrap.scrollHeight;
 }
-function fmtSize(b) { return b > 1024*1024 ? (b/1024/1024).toFixed(2)+' MB' : (b/1024).toFixed(1)+' KB'; }
-function uid() { return Math.random().toString(36).slice(2,8); }
-function setProgress(pct, label) {
-  document.getElementById('progressFill').style.width = pct + '%';
-  document.getElementById('progressLabel').textContent = label;
-}
-function setModelStatus(type, msg) {
-  const el = document.getElementById('modelStatus');
-  if (!msg) { el.className = 'model-status'; return; }
-  el.className = `model-status show ${type}`;
+
+function setStatus(type, msg) {
+  const el = document.getElementById('statusBox');
+  el.className = 'status-box ' + type;
   el.textContent = msg;
 }
-window.selectModel = function(btn) {
-  document.querySelectorAll('.model-btn').forEach(b => b.classList.remove('selected'));
-  btn.classList.add('selected');
-  selectedModel = btn.dataset.model;
-  transcriber = null;
-  setModelStatus('', '');
-  log(`モデル変更: ${selectedModel}`);
-};
-window.addFiles = function(fileList) {
-  let added = 0;
-  for (const f of fileList) {
-    if (files.some(x => x.name === f.name && x.size === f.size)) { log(`スキップ: ${f.name}`, 'warn'); continue; }
-    files.push({ id: uid(), file: f, name: f.name, size: f.size });
-    added++;
+
+function setProgress(pct, label) {
+  document.getElementById('progressFill').style.width = pct+'%';
+  document.getElementById('progressLabel').textContent = label;
+}
+
+function updateBtn() {
+  document.getElementById('btnRun').disabled = !(modelReady && selectedFile);
+}
+
+// ページ読み込み直後にモデルをバックグラウンドでロード
+async function loadModel() {
+  log('Whisper Tiny モデルをロード中…', 'warn');
+  log('初回のみDL（約40MB）します', 'warn');
+  try {
+    transcriber = await pipeline(
+      'automatic-speech-recognition',
+      'Xenova/whisper-tiny',
+      {
+        progress_callback: info => {
+          if (info.status === 'downloading') {
+            const pct = info.total ? Math.round(info.loaded/info.total*100) : 0;
+            setStatus('loading', `⏳ モデルDL中… ${pct}%`);
+          }
+        }
+      }
+    );
+    modelReady = true;
+    setStatus('ready', '✅ 準備完了 — ファイルを選択してください');
+    log('モデルロード完了', 'ok');
+    updateBtn();
+  } catch(e) {
+    setStatus('error', '❌ モデルロード失敗: ' + e.message);
+    log('モデルロードエラー: ' + e.message, 'err');
   }
-  log(`${added}件追加 → 合計${files.length}件`, 'ok');
-  renderFileList(); updateRunBtn();
+}
+
+loadModel();
+
+// ファイル選択
+window.onFileSelected = function(files) {
+  if (!files || files.length === 0) return;
+  selectedFile = files[0];
+  const ul = document.getElementById('fileList');
+  const ctrl = document.getElementById('fileControls');
+  ul.innerHTML = `
+    <li>
+      <div class="file-info">
+        <div class="file-name">${selectedFile.name}</div>
+        <div class="file-meta">${(selectedFile.size/1024/1024).toFixed(2)} MB</div>
+      </div>
+    </li>`;
+  ctrl.style.display = 'flex';
   document.getElementById('fileInput').value = '';
+  log('ファイル選択: ' + selectedFile.name, 'ok');
+  updateBtn();
 };
-window.removeFile = function(id) {
-  files = files.filter(f => f.id !== id);
+
+window.clearFile = function() {
+  selectedFile = null;
+  document.getElementById('fileList').innerHTML = '';
+  document.getElementById('fileControls').style.display = 'none';
+  document.getElementById('resultCard').classList.remove('show');
+  transcriptText = '';
+  updateBtn();
+};
+
+// 文字起こし実行
+window.startTranscribe = async function() {
+  if (!selectedFile || !transcriber) return;
+
+  const btn = document.getElementById('btnRun');
+  btn.disabled = true;
+  btn.textContent = '処理中…';
+  document.getElementById('resultCard').classList.remove('show');
+  document.getElementById('progressWrap').classList.add('show');
+  setProgress(10, 'ファイルを読み込み中…');
+  log('処理開始: ' + selectedFile.name);
+
+  try {
+    // ArrayBuffer取得
+    const arrayBuffer = await selectedFile.arrayBuffer();
+    setProgress(20, 'AudioContextでデコード中…');
+    log('AudioContextでデコード中…');
+
+    // 16kHz モノラルに変換（メモリ節約）
+    const audioCtx = new AudioContext({ sampleRate: 16000 });
+    const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer.slice(0));
+    const float32 = audioBuffer.getChannelData(0);
+    await audioCtx.close();
+
+    // ArrayBufferを明示的に解放
+    log(`デコード完了: ${audioBuffer.duration.toFixed(1)}秒`, 'ok');
+    setProgress(40, 'Whisper推論中… (しばらくお待ちください)');
+    log('Whisper推論開始…');
+
+    const result = await transcriber(float32, {
+      language: 'japanese',
+      task: 'transcribe',
+      chunk_length_s: 15,
+      stride_length_s: 3,
+      return_timestamps: false,
+    });
+
+    transcriptText = result.text || '';
+    setProgress(100, '完了');
+    document.getElementById('resultText').textContent = transcriptText;
+    document.getElementById('resultCard').classList.add('show');
+    log('✅ 完了: ' + transcriptText.slice(0, 50) + '…', 'ok');
+
+  } catch(e) {
+    log('❌ エラー: ' + e.message, 'err');
+    setStatus('error', '❌ エラー: ' + e.message);
+  }
+
+  btn.disabled = false;
+  btn.textContent = '🚀 文字起こし開始';
+};
+
+// コピー
+window.copyResult = async function() {
+  if (!transcriptText) return;
+  try { await navigator.clipboard.writeText(transcriptText); }
+  catch {
+    const ta = document.createElement('textarea');
+    ta.value = transcriptText;
+    document.body.appendChild(ta); ta.select();
+    document.execCommand('copy'); document.body.removeChild(ta);
+  }
+  const btn = document.querySelector('.btn-copy');
+  btn.textContent = '✅ コピー済み'; btn.classList.add('copied');
+  setTimeout(() => { btn.textContent = 'コピー'; btn.classList.remove('copied'); }, 2000);
+};
+</script>
+</body>
+</html>d);
   renderFileList(); updateRunBtn();
 };
 window.clearAllFiles = function() {
