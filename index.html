@@ -6,144 +6,62 @@
 <title>ローカル文字起こし</title>
 <style>
   :root {
-    --bg: #0f1117;
-    --surface: #1a1d27;
-    --surface2: #22263a;
-    --border: #2e3347;
-    --accent: #6c8fff;
-    --accent2: #a78bfa;
-    --success: #34d399;
-    --warn: #fbbf24;
-    --danger: #f87171;
-    --text: #e2e8f0;
-    --text2: #8892aa;
-    --radius: 10px;
+    --bg: #0f1117; --surface: #1a1d27; --surface2: #22263a;
+    --border: #2e3347; --accent: #6c8fff; --accent2: #a78bfa;
+    --success: #34d399; --warn: #fbbf24; --danger: #f87171;
+    --text: #e2e8f0; --text2: #8892aa; --radius: 10px;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Segoe UI', 'Hiragino Sans', sans-serif;
-    min-height: 100vh;
-    padding: 20px 16px 60px;
-  }
+  body { background: var(--bg); color: var(--text); font-family: 'Segoe UI','Hiragino Sans',sans-serif; min-height: 100vh; padding: 20px 16px 60px; }
   header { text-align: center; margin-bottom: 24px; }
-  header h1 {
-    font-size: 22px; font-weight: 700;
-    background: linear-gradient(90deg, var(--accent), var(--accent2));
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-  }
+  header h1 { font-size: 22px; font-weight: 700; background: linear-gradient(90deg,var(--accent),var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
   header p { font-size: 13px; color: var(--text2); margin-top: 4px; }
-  .card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 18px;
-    margin-bottom: 14px;
-  }
-  .card-title {
-    font-size: 13px; font-weight: 600; color: var(--text2);
-    text-transform: uppercase; letter-spacing: 0.08em;
-    margin-bottom: 12px;
-  }
-  .file-drop-zone {
-    border: 2px dashed var(--border);
-    border-radius: var(--radius);
-    padding: 28px 20px;
-    text-align: center;
-    cursor: pointer;
-    transition: border-color 0.2s, background 0.2s;
-  }
-  .file-drop-zone:hover {
-    border-color: var(--accent);
-    background: rgba(108,143,255,0.05);
-  }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; margin-bottom: 14px; }
+  .card-title { font-size: 13px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 12px; }
+  .file-drop-zone { border: 2px dashed var(--border); border-radius: var(--radius); padding: 28px 20px; text-align: center; cursor: pointer; }
   .file-drop-zone span { font-size: 32px; display: block; margin-bottom: 8px; }
   .file-drop-zone p { font-size: 14px; color: var(--text2); }
   input[type="file"] { display: none; }
   #fileList { list-style: none; margin-top: 12px; }
-  #fileList li {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 10px 12px;
-    margin-bottom: 8px;
-    display: flex; align-items: center; gap: 10px;
-  }
+  #fileList li { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; margin-bottom: 8px; display: flex; align-items: center; gap: 10px; }
   .file-info { flex: 1; min-width: 0; }
   .file-name { font-size: 13px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .file-meta { font-size: 11px; color: var(--text2); margin-top: 2px; }
-  .file-delete {
-    background: none; border: none; color: var(--text2);
-    font-size: 16px; cursor: pointer; padding: 2px 6px;
-    border-radius: 4px;
-  }
   .file-controls { display: flex; gap: 8px; margin-top: 10px; }
-  .btn-sm {
-    background: var(--surface2); border: 1px solid var(--border);
-    border-radius: 8px; color: var(--text); font-size: 13px;
-    padding: 8px 14px; cursor: pointer;
-  }
-  .btn-run {
-    width: 100%;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    border: none; border-radius: var(--radius);
-    color: #fff; font-size: 16px; font-weight: 600;
-    padding: 16px; cursor: pointer; margin-top: 8px;
-  }
-  .btn-run:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-sm { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 13px; padding: 8px 14px; cursor: pointer; }
+  .btn-run { width: 100%; background: linear-gradient(135deg,var(--accent),var(--accent2)); border: none; border-radius: var(--radius); color: #fff; font-size: 16px; font-weight: 600; padding: 16px; cursor: pointer; margin-top: 8px; }
+  .btn-run:disabled { opacity: .4; cursor: not-allowed; }
   .progress-wrap { display: none; margin-top: 12px; }
   .progress-wrap.show { display: block; }
   .progress-bar-bg { background: var(--surface2); border-radius: 99px; height: 8px; overflow: hidden; }
-  .progress-bar-fill {
-    height: 100%; border-radius: 99px;
-    background: linear-gradient(90deg, var(--accent), var(--accent2));
-    width: 0%; transition: width 0.4s;
-  }
+  .progress-bar-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg,var(--accent),var(--accent2)); width: 0%; transition: width .4s; }
   .progress-label { font-size: 12px; color: var(--text2); margin-top: 5px; text-align: center; }
-  .result-card {
-    display: none; background: var(--surface);
-    border: 1px solid var(--success);
-    border-radius: var(--radius); padding: 18px; margin-top: 14px;
-  }
+  .result-card { display: none; background: var(--surface); border: 1px solid var(--success); border-radius: var(--radius); padding: 18px; margin-top: 14px; }
   .result-card.show { display: block; }
   .result-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
   .result-title { font-size: 13px; font-weight: 600; color: var(--success); }
-  .btn-copy {
-    background: var(--surface2); border: 1px solid var(--border);
-    border-radius: 6px; color: var(--text); font-size: 12px;
-    padding: 6px 10px; cursor: pointer;
-  }
+  .btn-copy { background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-size: 12px; padding: 6px 10px; cursor: pointer; }
   .btn-copy.copied { border-color: var(--success); color: var(--success); }
-  .result-text {
-    font-size: 14px; line-height: 1.8; color: var(--text);
-    white-space: pre-wrap; background: var(--surface2);
-    border-radius: 8px; padding: 14px;
-    max-height: 400px; overflow-y: auto;
-  }
-  .status-box {
-    font-size: 12px; margin-top: 10px; padding: 10px 12px;
-    border-radius: 8px;
-  }
-  .status-box.loading { background: rgba(108,143,255,0.1); color: var(--accent); border: 1px solid rgba(108,143,255,0.25); }
-  .status-box.ready { background: rgba(52,211,153,0.1); color: var(--success); border: 1px solid rgba(52,211,153,0.25); }
-  .status-box.error { background: rgba(248,113,113,0.1); color: var(--danger); border: 1px solid rgba(248,113,113,0.25); }
-  .log-wrap {
-    background: var(--surface2); border: 1px solid var(--border);
-    border-radius: 8px; padding: 10px 12px;
-    margin-top: 10px; max-height: 120px; overflow-y: auto;
-  }
+  .result-text { font-size: 14px; line-height: 1.8; color: var(--text); white-space: pre-wrap; background: var(--surface2); border-radius: 8px; padding: 14px; max-height: 400px; overflow-y: auto; }
+  .status-box { font-size: 12px; margin-top: 10px; padding: 10px 12px; border-radius: 8px; }
+  .status-box.loading { background: rgba(108,143,255,.1); color: var(--accent); border: 1px solid rgba(108,143,255,.25); }
+  .status-box.ready { background: rgba(52,211,153,.1); color: var(--success); border: 1px solid rgba(52,211,153,.25); }
+  .status-box.error { background: rgba(248,113,113,.1); color: var(--danger); border: 1px solid rgba(248,113,113,.25); }
+  .log-wrap { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; margin-top: 10px; max-height: 120px; overflow-y: auto; }
   .log-line { font-size: 11px; color: var(--text2); font-family: monospace; margin-bottom: 3px; }
   .log-line.ok { color: var(--success); }
   .log-line.err { color: var(--danger); }
   .log-line.warn { color: var(--warn); }
+  .warn-box { background: rgba(251,191,36,.1); border: 1px solid rgba(251,191,36,.3); border-radius: 8px; padding: 10px 14px; font-size: 12px; color: var(--warn); margin-bottom: 14px; }
 </style>
 </head>
 <body>
 <header>
   <h1>🎙 ローカル文字起こし</h1>
-  <p>Whisper Tiny — スマホ最適化版</p>
+  <p>Whisper Small — 高精度版</p>
 </header>
+
+<div class="warn-box">⚠️ Whisper Smallはメモリを多く使います。<br>まず1分以内の短いファイルで試してください。</div>
 
 <div class="card">
   <div class="card-title">🎵 音声ファイル</div>
@@ -159,11 +77,9 @@
   </div>
 </div>
 
-<div class="status-box loading" id="statusBox">⏳ 準備中… モデルをロードしています（約40MB）</div>
+<div class="status-box loading" id="statusBox">⏳ 準備中… モデルをロードしています（約150MB）</div>
 
-<button class="btn-run" id="btnRun" disabled onclick="startTranscribe()">
-  🚀 文字起こし開始
-</button>
+<button class="btn-run" id="btnRun" disabled onclick="startTranscribe()">🚀 文字起こし開始</button>
 
 <div class="progress-wrap" id="progressWrap">
   <div class="progress-bar-bg"><div class="progress-bar-fill" id="progressFill"></div></div>
@@ -184,14 +100,10 @@
 
 <script type="module">
 import { pipeline, env } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2/dist/transformers.min.js';
-
 env.allowLocalModels = false;
 env.useBrowserCache = true;
 
-let selectedFile = null;
-let transcriber = null;
-let transcriptText = '';
-let modelReady = false;
+let selectedFile = null, transcriber = null, transcriptText = '', modelReady = false;
 
 function log(msg, type='') {
   const wrap = document.getElementById('logWrap');
@@ -202,39 +114,31 @@ function log(msg, type='') {
   wrap.appendChild(d);
   wrap.scrollTop = wrap.scrollHeight;
 }
-
 function setStatus(type, msg) {
   const el = document.getElementById('statusBox');
   el.className = 'status-box ' + type;
   el.textContent = msg;
 }
-
 function setProgress(pct, label) {
   document.getElementById('progressFill').style.width = pct+'%';
   document.getElementById('progressLabel').textContent = label;
 }
-
 function updateBtn() {
   document.getElementById('btnRun').disabled = !(modelReady && selectedFile);
 }
 
-// ページ読み込み直後にモデルをバックグラウンドでロード
 async function loadModel() {
-  log('Whisper Tiny モデルをロード中…', 'warn');
-  log('初回のみDL（約40MB）します', 'warn');
+  log('Whisper Small モデルをロード中…', 'warn');
+  log('初回のみDL（約150MB）します', 'warn');
   try {
-    transcriber = await pipeline(
-      'automatic-speech-recognition',
-      'Xenova/whisper-tiny',
-      {
-        progress_callback: info => {
-          if (info.status === 'downloading') {
-            const pct = info.total ? Math.round(info.loaded/info.total*100) : 0;
-            setStatus('loading', `⏳ モデルDL中… ${pct}%`);
-          }
+    transcriber = await pipeline('automatic-speech-recognition', 'Xenova/whisper-small', {
+      progress_callback: info => {
+        if (info.status === 'downloading') {
+          const pct = info.total ? Math.round(info.loaded/info.total*100) : 0;
+          setStatus('loading', `⏳ モデルDL中… ${pct}%`);
         }
       }
-    );
+    });
     modelReady = true;
     setStatus('ready', '✅ 準備完了 — ファイルを選択してください');
     log('モデルロード完了', 'ok');
@@ -244,23 +148,14 @@ async function loadModel() {
     log('モデルロードエラー: ' + e.message, 'err');
   }
 }
-
 loadModel();
 
-// ファイル選択
 window.onFileSelected = function(files) {
   if (!files || files.length === 0) return;
   selectedFile = files[0];
-  const ul = document.getElementById('fileList');
-  const ctrl = document.getElementById('fileControls');
-  ul.innerHTML = `
-    <li>
-      <div class="file-info">
-        <div class="file-name">${selectedFile.name}</div>
-        <div class="file-meta">${(selectedFile.size/1024/1024).toFixed(2)} MB</div>
-      </div>
-    </li>`;
-  ctrl.style.display = 'flex';
+  const sec = '（長さ不明）';
+  document.getElementById('fileList').innerHTML = `<li><div class="file-info"><div class="file-name">${selectedFile.name}</div><div class="file-meta">${(selectedFile.size/1024/1024).toFixed(2)} MB</div></div></li>`;
+  document.getElementById('fileControls').style.display = 'flex';
   document.getElementById('fileInput').value = '';
   log('ファイル選択: ' + selectedFile.name, 'ok');
   updateBtn();
@@ -275,10 +170,8 @@ window.clearFile = function() {
   updateBtn();
 };
 
-// 文字起こし実行
 window.startTranscribe = async function() {
   if (!selectedFile || !transcriber) return;
-
   const btn = document.getElementById('btnRun');
   btn.disabled = true;
   btn.textContent = '処理中…';
@@ -286,56 +179,49 @@ window.startTranscribe = async function() {
   document.getElementById('progressWrap').classList.add('show');
   setProgress(10, 'ファイルを読み込み中…');
   log('処理開始: ' + selectedFile.name);
-
   try {
-    // ArrayBuffer取得
     const arrayBuffer = await selectedFile.arrayBuffer();
-    setProgress(20, 'AudioContextでデコード中…');
-    log('AudioContextでデコード中…');
-
-    // 16kHz モノラルに変換（メモリ節約）
+    setProgress(20, 'デコード中…');
     const audioCtx = new AudioContext({ sampleRate: 16000 });
     const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer.slice(0));
     const float32 = audioBuffer.getChannelData(0);
     await audioCtx.close();
-
-    // ArrayBufferを明示的に解放
     log(`デコード完了: ${audioBuffer.duration.toFixed(1)}秒`, 'ok');
-    setProgress(40, 'Whisper推論中… (しばらくお待ちください)');
-    log('Whisper推論開始…');
 
+    // 5分超は警告
+    if (audioBuffer.duration > 300) {
+      log('⚠️ 5分超のファイルです。クラッシュする可能性があります', 'warn');
+    }
+
+    setProgress(40, 'Whisper推論中…');
+    log('Whisper推論開始…');
     const result = await transcriber(float32, {
       language: 'japanese',
       task: 'transcribe',
-      chunk_length_s: 15,
-      stride_length_s: 3,
+      chunk_length_s: 20,
+      stride_length_s: 4,
       return_timestamps: false,
     });
-
     transcriptText = result.text || '';
     setProgress(100, '完了');
     document.getElementById('resultText').textContent = transcriptText;
     document.getElementById('resultCard').classList.add('show');
-    log('✅ 完了: ' + transcriptText.slice(0, 50) + '…', 'ok');
-
+    log('✅ 完了', 'ok');
   } catch(e) {
     log('❌ エラー: ' + e.message, 'err');
     setStatus('error', '❌ エラー: ' + e.message);
   }
-
   btn.disabled = false;
   btn.textContent = '🚀 文字起こし開始';
 };
 
-// コピー
 window.copyResult = async function() {
   if (!transcriptText) return;
   try { await navigator.clipboard.writeText(transcriptText); }
   catch {
     const ta = document.createElement('textarea');
-    ta.value = transcriptText;
-    document.body.appendChild(ta); ta.select();
-    document.execCommand('copy'); document.body.removeChild(ta);
+    ta.value = transcriptText; document.body.appendChild(ta);
+    ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
   }
   const btn = document.querySelector('.btn-copy');
   btn.textContent = '✅ コピー済み'; btn.classList.add('copied');
